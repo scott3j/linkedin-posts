@@ -26,18 +26,25 @@ function getMarkdownFiles(directory: string): string[] {
 function generateMarkdownLink(fileName: string): string {
   const name = path.parse(fileName).name;
   const title = name.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-  return `- [${title}](/${fileName})`;
+  return `- [${title}](/docs/${fileName})`;
 }
 
 // Main function
 function updateReadme(): void {
-  const currentDir = process.cwd();
+  const rootDir = process.cwd();
+  const docsDir = path.join(rootDir, 'docs');
 
-  // First, check and modify filenames with spaces
-  checkAndModifyFilenames(currentDir);
+  // Check if docs directory exists
+  if (!fs.existsSync(docsDir)) {
+    console.error("The 'docs' directory does not exist in the root directory.");
+    return;
+  }
 
-  const readmePath = path.join(currentDir, 'README.md');
-  const markdownFiles = getMarkdownFiles(currentDir);
+  // First, check and modify filenames with spaces in the docs directory
+  checkAndModifyFilenames(docsDir);
+
+  const readmePath = path.join(rootDir, 'README.md');
+  const markdownFiles = getMarkdownFiles(docsDir);
 
   // Generate links
   const links = markdownFiles.map(generateMarkdownLink).join('\n');
@@ -63,7 +70,7 @@ function updateReadme(): void {
   // Write updated content back to README.md
   fs.writeFileSync(readmePath, newContent);
 
-  console.log('README.md has been updated with the list of markdown files.');
+  console.log('README.md has been updated with the list of markdown files from the docs directory.');
 }
 
 // Run the script
